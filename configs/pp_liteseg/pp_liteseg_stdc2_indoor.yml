@@ -1,0 +1,56 @@
+batch_size: 4  #设定batch_size的值即为迭代一次送入网络的图片数量，一般显卡显存越大，batch_size的值可以越大。如果使用多卡训练，总得batch size等于该batch size乘以卡数。
+iters: 160000    #模型训练迭代的轮数
+
+train_dataset:  #训练数据设置
+  type: Dataset #指定加载数据集的类。数据集类的代码在`PaddleSeg/paddleseg/datasets`目录下。
+  dataset_root: data/indoor_lunjiao_seg #数据集路径
+  train_path: data/indoor_lunjiao_seg/train.txt  #数据集中用于训练的标识文件
+  num_classes: 3  #指定类别个数（背景也算为一类）
+  mode: train #表示用于训练
+  transforms: #模型训练的数据预处理方式。
+    - type: ResizeStepScaling #将原始图像和标注图像随机缩放为0.5~2.0倍
+      min_scale_factor: 0.5
+      max_scale_factor: 2.0
+      scale_step_size: 0.25
+  transforms:
+    - type: Resize
+      target_size: [512, 512]
+    - type: RandomHorizontalFlip  #对原始图像和标注图像随机进行水平反转
+    - type: RandomDistort #对原始图像进行亮度、对比度、饱和度随机变动，标注图像不变
+      brightness_range: 0.5
+      contrast_range: 0.5
+      saturation_range: 0.5
+    - type: Normalize #对原始图像进行归一化，标注图像保持不变
+
+val_dataset:  #验证数据设置
+  type: Dataset #指定加载数据集的类。数据集类的代码在`PaddleSeg/paddleseg/datasets`目录下。
+  dataset_root: data/indoor_lunjiao_seg #数据集路径
+  val_path: data/indoor_lunjiao_seg/val.txt  #数据集中用于验证的标识文件
+  num_classes: 3  #指定类别个数（背景也算为一类）
+  mode: val #表示用于验证
+  transforms:
+    - type: Resize
+      target_size: [512, 512]
+    - type: Normalize #对原始图像进行归一化，标注图像保持不变
+
+optimizer: #设定优化器的类型
+  type: sgd #采用SGD（Stochastic Gradient Descent）随机梯度下降方法为优化器
+  momentum: 0.9 #设置SGD的动量
+  weight_decay: 4.0e-5 #权值衰减，使用的目的是防止过拟合
+
+lr_scheduler: # 学习率的相关设置
+  type: PolynomialDecay # 一种学习率类型。共支持12种策略
+  learning_rate: 0.01 # 初始学习率
+  power: 0.9
+  end_lr: 0
+
+loss: #设定损失函数的类型
+  types:
+    - type: CrossEntropyLoss  #CE损失
+  coef: [1, 1, 1] # PP-LiteSeg有一个主loss和两个辅助loss，coef表示权重，所以 total_loss = coef_1 * loss_1 + .... + coef_n * loss_n
+
+model:  #模型说明
+  type: PPLiteSeg  #设定模型类别
+  backbone:  # 设定模型的backbone，包括名字和预训练权重
+    type: STDC2
+    pretrained: https://bj.bcebos.com/paddleseg/dygraph/PP_STDCNet2.tar.gz
