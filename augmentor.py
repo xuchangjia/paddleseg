@@ -1,8 +1,8 @@
 import Augmentor
  
 #注意此处两个文件夹中图片名必须完全一致，包括后缀名
-p = Augmentor.Pipeline('/home/bzl/Documents/rk_seg/PaddleSeg/data/indoor_lunjiao_seg/image') #images中是原图像
-p.ground_truth('/home/bzl/Documents/rk_seg/PaddleSeg/data/indoor_lunjiao_seg/mask') #labels中是掩码图像
+p = Augmentor.Pipeline('/home/bzl/Documents/rk_seg/PaddleSeg/data/seg_data') #images中是原图像
+# p.ground_truth('/home/bzl/Documents/rk_seg/PaddleSeg/data/indoor_lunjiao_seg/mask') #labels中是掩码图像
 
 # # 图像左右互换： 按照概率0.5执行
 # p.flip_left_right(probability=1)
@@ -61,13 +61,13 @@ p.ground_truth('/home/bzl/Documents/rk_seg/PaddleSeg/data/indoor_lunjiao_seg/mas
 # p.flip_random(probability=1)
 # p.process()
 
-# # 旋转90
-# p.rotate90(probability=0.5)
+# 旋转90
+p.rotate90(probability=0.5)
 
 # # 遮挡(暂时不需要)
 # p.random_erasing(probability=1, rectangle_area=0.2)
 # p.process() 
 
 # 最终扩充的数据样本数可以更换为100。1000等
-# p.sample(10) 
+p.sample(10)
 
